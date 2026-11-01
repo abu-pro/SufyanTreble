@@ -12,17 +12,19 @@ A lightweight custom GSI for the **Realme Note 50** (4 GB / 64 GB, Unisoc T612),
 - **Play Store built in** — a light Google pack (MindTheGapps core): Play Services + Play Store + the small sync pieces, nothing else from Google
 - **Play Integrity Fix + Tricky Store setup** — the official module zips (Tricky Store, Tricky Addon by KOWX712, PlayIntegrityFork), a pre-seeded target list and a fingerprint config are carried inside the ROM at `/system/etc/sufyan/` with a plain-language README. They activate after a clean Magisk root, in the order written there. **Honest note:** no keybox is bundled — DEVICE/STRONG integrity depends on a valid keybox, which no ROM can guarantee
 - **Gold boot animation** — SufyanTreble's own, drawn at 2x and fitted to the Note 50's 720×1600 screen
-- **Version check** — Settings → About shows *SufyanTreble 1.0*
+- **Version check** — Settings → About shows *SufyanTreble 1.1*
 - Everything a GSI needs stays untouched: telephony/IMS, Treble settings, DSU support
 
-## Download (v1.0)
+## Download (v1.1 — latest)
+
+**New in v1.1:** Google SetupWizard is now baked in, so the first-boot Google setup flow runs properly (v1.0 could stall before the home screen and sign-in); new "SUFYAN OS" gold boot animation with a gentle breathing glow. SIM/telephony is unchanged from v1.0 — on the test phone the SIMs got no service on this base; check your IMEI/SIM status first in the DSU test.
 
 | File | Size | SHA-256 |
 |---|---|---|
-| `SufyanTreble-v1.0-arm64-ab.img.xz` | 890,648,352 B (~0.89 GB) | `2595620d556775ec21bb5fa3b57af34a5da19db75a0d5d963c895f8599060e05` |
-| `SufyanTreble-v1.0-arm64-ab.img` (uncompressed) | 2,892,152,832 B (~2.89 GB) | `62962b5fcbbd83bece765cc4d1c44e3333af9aaeac187b6f71ab0008fa744a5f` |
+| `SufyanTreble-v1.1-arm64-ab.img.xz` | 842,438,512 B (~0.84 GB) | `a8850d8a53ad8f885c877002d2b49b5e5f4a36a11c57e94fb0eacc87ebbaafdb` |
+| `SufyanTreble-v1.1-arm64-ab.img` (uncompressed) | 2,892,152,832 B (~2.89 GB) | `4d13fcae89df03cf1fd3a1490bc13c37e2061c1121b2ab140f9f64d7df83d62b` |
 
-**Download:** [SufyanTreble-v1.0-arm64-ab.img.xz](https://github.com/abu-pro/SufyanTreble/releases/download/v1.0/SufyanTreble-v1.0-arm64-ab.img.xz) — from the [v1.0 release](https://github.com/abu-pro/SufyanTreble/releases/tag/v1.0).
+**Download:** [SufyanTreble-v1.1-arm64-ab.img.xz](https://github.com/abu-pro/SufyanTreble/releases/download/v1.1/SufyanTreble-v1.1-arm64-ab.img.xz) — from the [v1.1 release](https://github.com/abu-pro/SufyanTreble/releases/tag/v1.1). The older [v1.0 release](https://github.com/abu-pro/SufyanTreble/releases/tag/v1.0) stays available.
 
 ## Trying it safely — DSU first
 
