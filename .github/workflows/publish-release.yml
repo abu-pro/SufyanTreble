@@ -9,6 +9,9 @@ on:
       sha256:
         description: "Expected sha256 of the image .img.xz"
         required: true
+      version:
+        description: "Release version, e.g. 1.1"
+        required: true
 
 permissions:
   contents: write
@@ -19,38 +22,38 @@ jobs:
     steps:
       - name: Download image from Drive
         run: |
-          curl -L "https://drive.usercontent.google.com/download?id=${{ inputs.drive_id }}&export=download&confirm=t" -o SufyanTreble-v1.0-arm64-ab.img.xz
-          ls -la SufyanTreble-v1.0-arm64-ab.img.xz
+          ASSET="SufyanTreble-v${{ inputs.version }}-arm64-ab.img.xz"
+          echo "ASSET=$ASSET" >> "$GITHUB_ENV"
+          curl -L "https://drive.usercontent.google.com/download?id=${{ inputs.drive_id }}&export=download&confirm=t" -o "$ASSET"
+          ls -la "$ASSET"
 
       - name: Verify checksum (fallback to gdown if the direct fetch was an interstitial)
         run: |
-          if ! echo "${{ inputs.sha256 }}  SufyanTreble-v1.0-arm64-ab.img.xz" | sha256sum -c -; then
+          if ! echo "${{ inputs.sha256 }}  $ASSET" | sha256sum -c -; then
             echo "Direct fetch did not match; retrying with gdown"
             pip install --quiet gdown
-            gdown "${{ inputs.drive_id }}" -O SufyanTreble-v1.0-arm64-ab.img.xz
-            echo "${{ inputs.sha256 }}  SufyanTreble-v1.0-arm64-ab.img.xz" | sha256sum -c -
+            gdown "${{ inputs.drive_id }}" -O "$ASSET"
+            echo "${{ inputs.sha256 }}  $ASSET" | sha256sum -c -
           fi
 
       - name: Write release notes
         run: |
-          cat > notes.md <<'EOF'
-          **SufyanTreble v1.0** — a lightweight custom GSI for the Realme Note 50 (Android 15, arm64, A/B). Made by Abu Sufyan.
+          SIZE=$(stat -c%s "$ASSET")
+          cat > notes.md <<EOF
+          **SufyanTreble v${{ inputs.version }}** — a lightweight custom GSI for the Realme Note 50 (Android 15, arm64, A/B). Made by Abu Sufyan.
 
-          Inside: debloated TrebleDroid AOSP base (17 packages removed), a light Google pack with the Play Store built in, Play Integrity Fix + Tricky Store setup files carried at /system/etc/sufyan/ (they activate after a clean Magisk root, in the order written there — no keybox is bundled and no integrity verdict is guaranteed), the gold SufyanTreble boot animation, and "SufyanTreble 1.0" in Settings -> About.
+          See the repository README for what is inside and the DSU-first guidance. Try it safely with DSU first (temporary boot, a reboot returns to your current ROM). Flash only after the checklist passes: home screen, calls, SMS, Wi-Fi, camera, fingerprint, Play Store sign-in.
 
-          Try it safely with DSU first (temporary boot, a reboot returns to your current ROM). Flash only after the checklist passes: calls, SMS, Wi-Fi, camera, fingerprint, Play Store sign-in.
-
-          Asset: SufyanTreble-v1.0-arm64-ab.img.xz — 890,648,352 B — sha256 2595620d556775ec21bb5fa3b57af34a5da19db75a0d5d963c895f8599060e05
-          Full details: see the repository README.
+          Asset: $ASSET — $SIZE B — sha256 ${{ inputs.sha256 }}
           EOF
 
       - name: Create release with asset
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          if gh release view v1.0 >/dev/null 2>&1; then
-            gh release upload v1.0 SufyanTreble-v1.0-arm64-ab.img.xz --clobber
+          if gh release view "v${{ inputs.version }}" >/dev/null 2>&1; then
+            gh release upload "v${{ inputs.version }}" "$ASSET" --clobber
           else
-            gh release create v1.0 SufyanTreble-v1.0-arm64-ab.img.xz --title "SufyanTreble v1.0" --notes-file notes.md
+            gh release create "v${{ inputs.version }}" "$ASSET" --title "SufyanTreble v${{ inputs.version }}" --notes-file notes.md
           fi
