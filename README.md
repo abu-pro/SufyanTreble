@@ -22,7 +22,7 @@ A lightweight custom GSI for the **Realme Note 50** (4 GB / 64 GB, Unisoc T612),
 | `SufyanTreble-v1.0-arm64-ab.img.xz` | 890,648,352 B (~0.89 GB) | `2595620d556775ec21bb5fa3b57af34a5da19db75a0d5d963c895f8599060e05` |
 | `SufyanTreble-v1.0-arm64-ab.img` (uncompressed) | 2,892,152,832 B (~2.89 GB) | `62962b5fcbbd83bece765cc4d1c44e3333af9aaeac187b6f71ab0008fa744a5f` |
 
-The download link for the image is shared by the author with each release.
+**Download:** [SufyanTreble-v1.0-arm64-ab.img.xz](https://github.com/abu-pro/SufyanTreble/releases/download/v1.0/SufyanTreble-v1.0-arm64-ab.img.xz) — from the [v1.0 release](https://github.com/abu-pro/SufyanTreble/releases/tag/v1.0).
 
 ## Trying it safely — DSU first
 
