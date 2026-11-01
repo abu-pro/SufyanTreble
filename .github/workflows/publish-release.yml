@@ -47,5 +47,10 @@ jobs:
       - name: Create release with asset
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
-          gh release create v1.0 SufyanTreble-v1.0-arm64-ab.img.xz --title "SufyanTreble v1.0" --notes-file notes.md
+          if gh release view v1.0 >/dev/null 2>&1; then
+            gh release upload v1.0 SufyanTreble-v1.0-arm64-ab.img.xz --clobber
+          else
+            gh release create v1.0 SufyanTreble-v1.0-arm64-ab.img.xz --title "SufyanTreble v1.0" --notes-file notes.md
+          fi
