@@ -4,8 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       drive_id:
-        description: "Google Drive file id of the image .img.xz"
-        required: true
+        description: "Google Drive file id of the image .img.xz (single-file mode)"
+        required: false
+        default: ""
+      drive_ids:
+        description: "Comma-separated Google Drive file ids of the .img.xz parts, in order (parts mode)"
+        required: false
+        default: ""
       sha256:
         description: "Expected sha256 of the image .img.xz"
         required: true
@@ -24,16 +29,45 @@ jobs:
         run: |
           ASSET="SufyanTreble-v${{ inputs.version }}-arm64-ab.img.xz"
           echo "ASSET=$ASSET" >> "$GITHUB_ENV"
-          curl -L "https://drive.usercontent.google.com/download?id=${{ inputs.drive_id }}&export=download&confirm=t" -o "$ASSET"
+          if [ -n "${{ inputs.drive_ids }}" ]; then
+            mkdir -p parts
+            i=0
+            IFS=',' read -ra IDS <<< "${{ inputs.drive_ids }}"
+            for id in "${IDS[@]}"; do
+              printf -v name "parts/part%02d" "$i"
+              echo "Downloading part $i (Drive id $id)"
+              curl -L "https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t" -o "$name"
+              ls -la "$name"
+              i=$((i+1))
+            done
+            cat parts/part* > "$ASSET"
+          else
+            curl -L "https://drive.usercontent.google.com/download?id=${{ inputs.drive_id }}&export=download&confirm=t" -o "$ASSET"
+          fi
           ls -la "$ASSET"
 
       - name: Verify checksum (fallback to gdown if the direct fetch was an interstitial)
         run: |
           if ! echo "${{ inputs.sha256 }}  $ASSET" | sha256sum -c -; then
-            echo "Direct fetch did not match; retrying with gdown"
-            pip install --quiet gdown
-            gdown "${{ inputs.drive_id }}" -O "$ASSET"
-            echo "${{ inputs.sha256 }}  $ASSET" | sha256sum -c -
+            if [ -n "${{ inputs.drive_ids }}" ]; then
+              echo "Joined parts did not match; retrying each part with gdown"
+              pip install --quiet gdown
+              i=0
+              IFS=',' read -ra IDS <<< "${{ inputs.drive_ids }}"
+              for id in "${IDS[@]}"; do
+                printf -v name "parts/part%02d" "$i"
+                gdown "${id}" -O "$name"
+                ls -la "$name"
+                i=$((i+1))
+              done
+              cat parts/part* > "$ASSET"
+              echo "${{ inputs.sha256 }}  $ASSET" | sha256sum -c -
+            else
+              echo "Direct fetch did not match; retrying with gdown"
+              pip install --quiet gdown
+              gdown "${{ inputs.drive_id }}" -O "$ASSET"
+              echo "${{ inputs.sha256 }}  $ASSET" | sha256sum -c -
+            fi
           fi
 
       - name: Write release notes
