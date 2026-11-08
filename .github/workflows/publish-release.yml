@@ -17,6 +17,14 @@ on:
       version:
         description: "Release version, e.g. 1.1"
         required: true
+      asset_name:
+        description: "Override asset file name (default: SufyanTreble-v<version>-arm64-ab.img.xz)"
+        required: false
+        default: ""
+      release_tag:
+        description: "Override release tag (default: v<version>)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -27,7 +35,8 @@ jobs:
     steps:
       - name: Download image from Drive
         run: |
-          ASSET="SufyanTreble-v${{ inputs.version }}-arm64-ab.img.xz"
+          ASSET="${{ inputs.asset_name }}"
+          if [ -z "$ASSET" ]; then ASSET="SufyanTreble-v${{ inputs.version }}-arm64-ab.img.xz"; fi
           echo "ASSET=$ASSET" >> "$GITHUB_ENV"
           if [ -n "${{ inputs.drive_ids }}" ]; then
             mkdir -p parts
@@ -86,8 +95,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          if gh release view "v${{ inputs.version }}" >/dev/null 2>&1; then
-            gh release upload "v${{ inputs.version }}" "$ASSET" --clobber
+          TAG="${{ inputs.release_tag }}"
+          if [ -z "$TAG" ]; then TAG="v${{ inputs.version }}"; fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber
           else
-            gh release create "v${{ inputs.version }}" "$ASSET" --title "SufyanTreble v${{ inputs.version }}" --notes-file notes.md
+            gh release create "$TAG" "$ASSET" --title "SufyanTreble v${{ inputs.version }}" --notes-file notes.md
           fi
