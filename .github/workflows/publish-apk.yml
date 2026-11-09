@@ -1,0 +1,49 @@
+name: Publish APK release
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_url:
+        description: "Public URL of the file to publish"
+        required: true
+      sha256:
+        description: "Expected sha256 of the file"
+        required: true
+      tag:
+        description: "Release tag"
+        required: true
+      asset_name:
+        description: "Asset file name"
+        required: true
+      title:
+        description: "Release title"
+        required: true
+      notes:
+        description: "Release notes"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download file
+        run: |
+          curl -fL "${{ inputs.file_url }}" -o "${{ inputs.asset_name }}"
+          ls -la "${{ inputs.asset_name }}"
+      - name: Verify checksum
+        run: |
+          echo "${{ inputs.sha256 }}  ${{ inputs.asset_name }}" | sha256sum -c -
+      - name: Create release with asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "${{ inputs.tag }}" >/dev/null 2>&1; then
+            gh release upload "${{ inputs.tag }}" "${{ inputs.asset_name }}" --clobber
+          else
+            gh release create "${{ inputs.tag }}" "${{ inputs.asset_name }}" --title "${{ inputs.title }}" --notes "${{ inputs.notes }}"
+          fi
